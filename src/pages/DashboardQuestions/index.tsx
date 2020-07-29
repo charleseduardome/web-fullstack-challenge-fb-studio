@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import Switch from 'react-switch';
+import { useHistory } from 'react-router-dom';
 import Pagination from '@material-ui/lab/Pagination';
+import Switch from 'react-switch';
 import parse from 'html-react-parser';
 
 import api from '../../services/api';
+
+import { useQuestion } from '../../hooks/question';
 
 import Header from '../../components/Header';
 import Button from '../../components/Button';
@@ -28,6 +31,9 @@ interface Question {
 }
 
 const DashboardQuestions = () => {
+  const history = useHistory();
+  const { selectQuestion } = useQuestion();
+
   const [questions, setQuestions] = useState<Question[]>([]);
   const [page, setPage] = useState(1);
 
@@ -40,7 +46,6 @@ const DashboardQuestions = () => {
       })
       .then(response => {
         setQuestions(response.data);
-        console.log(response.data);
       });
   }, [page]);
 
@@ -68,9 +73,15 @@ const DashboardQuestions = () => {
     window.scrollTo(0, 0);
   };
 
+  const handleEditQuestion = (question: Question) => {
+    selectQuestion(question);
+    history.push('/editquestion');
+  };
+
   return (
     <Container>
       <Header />
+
       <ContentQuestion>
         {questions.map(question => (
           <li key={question.id}>
@@ -106,7 +117,9 @@ const DashboardQuestions = () => {
               <strong>Enunciado:</strong>
             </div>
             <span>{parse(question.enunciado)}</span>
-            <Button>EDITAR QUESTÃO</Button>
+            <Button onClick={() => handleEditQuestion(question)}>
+              EDITAR QUESTÃO
+            </Button>
           </li>
         ))}
         <Pagination
